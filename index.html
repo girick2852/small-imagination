@@ -33,6 +33,13 @@
     h1{font-size:clamp(42px,5.2vw,66px);line-height:1.04;letter-spacing:-2.8px;margin:22px 0 20px;max-width:650px}
     h1 span{color:var(--brand)}
     .lead{font-size:18px;color:#5b716d;max-width:560px;margin:0 0 28px}
+    .hero-search{display:flex;gap:9px;max-width:570px;margin:0 0 7px;background:#fff;padding:7px;border:1px solid #dce9e2;border-radius:999px;box-shadow:0 10px 28px rgba(19,58,54,.08)}
+    .hero-search input{flex:1;min-width:0;border:0;outline:0!important;box-shadow:none!important;background:transparent;margin:0;padding:10px 14px;font-size:14px}
+    .hero-search .btn{flex-shrink:0;padding:11px 20px}
+    .search-hint{font-size:11px;color:#6b7d78;margin:0 0 20px 14px}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .results-count{font-size:13px;color:var(--muted);text-align:center;margin:-12px 0 18px}
+    @media(max-width:520px){.hero-search{border-radius:16px}.hero-search .btn{padding:10px 14px}}
     .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
     .trustline{display:flex;gap:20px;flex-wrap:wrap;margin-top:30px;color:#61746f;font-size:12px;font-weight:650}
     .trustline span:before{content:"✓";color:var(--brand);font-weight:900;margin-right:7px}
@@ -129,6 +136,12 @@
           <div class="eyebrow">A thoughtful pharmaceutical venture</div>
           <h1>Better access begins with <span>careful choices.</span></h1>
           <p class="lead">Small Imagination is building a more thoughtful way to discover pharmaceutical products and connect with a responsive, service-led team.</p>
+          <form class="hero-search" id="siteSearchForm" role="search" aria-label="Search the product catalogue">
+            <label class="sr-only" for="siteSearch">Search the product catalogue</label>
+            <input id="siteSearch" type="search" placeholder="Search products, brands or categories…" autocomplete="off">
+            <button class="btn btn-primary" type="submit">Search</button>
+          </form>
+          <p class="search-hint">Search product names, categories, manufacturers and pack details.</p>
           <div class="hero-actions">
             <a class="btn btn-primary" href="#contact">Make an enquiry <span>→</span></a>
             <a class="btn btn-light" href="#about">Discover our approach</a>
@@ -178,6 +191,7 @@
             <option value="">All categories</option>
           </select>
         </div>
+        <p class="results-count" id="resultsCount" aria-live="polite">Showing all products</p>
         <div class="product-grid" id="productGrid" aria-live="polite"></div>
         <div class="catalogue-note"><strong>Important information:</strong> This is an informational catalogue only, not an offer to sell or supply medicines. Product composition, pack details, classification, availability and applicable sale permissions must be independently verified before any commercial transaction. No diagnosis, treatment or dosage advice is provided here.</div>
       </div>
@@ -288,6 +302,8 @@
     const productGrid = document.getElementById("productGrid");
     const categoryFilter = document.getElementById("categoryFilter");
     const productSearch = document.getElementById("productSearch");
+    const siteSearch = document.getElementById("siteSearch");
+    const resultsCount = document.getElementById("resultsCount");
     const categories = [...new Set(products.map(p => p[1]))].sort();
     categories.forEach(category => {
       const option = document.createElement("option");
@@ -302,9 +318,10 @@
         (!q || p.join(" ").toLowerCase().includes(q))
       );
       productGrid.replaceChildren();
+      resultsCount.textContent = q || category ? (filtered.length + (filtered.length === 1 ? " matching product" : " matching products")) : ("Showing all " + filtered.length + " products");
       if(!filtered.length){
         const empty=document.createElement("p"); empty.className="empty-products";
-        empty.textContent="No matching products found."; productGrid.appendChild(empty); return;
+        empty.textContent="No matching products found. Try another product name, brand or category."; productGrid.appendChild(empty); return;
       }
       filtered.forEach(p=>{
         const card=document.createElement("article"); card.className="product-card";
@@ -315,7 +332,15 @@
         card.append(tag,title,brand,meta); productGrid.appendChild(card);
       });
     }
-    productSearch.addEventListener("input",renderProducts);
+    productSearch.addEventListener("input",function(){ if(siteSearch.value !== this.value) siteSearch.value=this.value; renderProducts(); });
+    siteSearch.addEventListener("input",function(){ productSearch.value=this.value; renderProducts(); });
+    document.getElementById("siteSearchForm").addEventListener("submit",function(e){
+      e.preventDefault();
+      productSearch.value=siteSearch.value.trim();
+      renderProducts();
+      document.getElementById("catalogue").scrollIntoView({behavior:"smooth",block:"start"});
+      productSearch.focus({preventScroll:true});
+    });
     categoryFilter.addEventListener("change",renderProducts);
     renderProducts();
     document.getElementById("year").textContent = new Date().getFullYear();
