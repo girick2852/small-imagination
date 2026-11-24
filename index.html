@@ -57,6 +57,21 @@
     .icon{width:48px;height:48px;border-radius:15px;background:#e7f3ed;display:grid;place-items:center;font-size:22px;margin-bottom:18px}
     .card h3{margin:0 0 8px;font-size:18px}
     .card p{margin:0;color:var(--muted);font-size:14px}
+
+    .catalogue{background:#f7f8f3}
+    .catalogue-tools{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:0 auto 28px;max-width:850px}
+    .catalogue-tools input,.catalogue-tools select{max-width:360px;margin:0;background:#fff}
+    .product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .product-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:8px;min-width:0}
+    .product-tag{font-size:11px;font-weight:800;color:var(--brand);background:#e7f3ed;border-radius:999px;padding:5px 9px;align-self:flex-start}
+    .product-card h3{font-size:17px;line-height:1.3;margin:2px 0}
+    .product-card p{font-size:13px;color:var(--muted);margin:0}
+    .product-meta{font-size:12px;color:#49625e;border-top:1px solid var(--line);padding-top:10px;margin-top:auto}
+    .catalogue-note{max-width:850px;margin:26px auto 0;padding:16px 18px;border-radius:14px;background:#fff6df;border:1px solid #f0dfad;color:#735a20;font-size:12px}
+    .empty-products{text-align:center;color:var(--muted);grid-column:1/-1;padding:30px}
+    @media(max-width:800px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:520px){.product-grid{grid-template-columns:1fr}.catalogue-tools input,.catalogue-tools select{max-width:none}}
+
     .about{background:#edf4ef}
     .about-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:56px;align-items:center}
     .about-art{min-height:330px;border-radius:28px;background:linear-gradient(145deg,#d9ece3,#f8f5e9);display:grid;place-items:center;position:relative;overflow:hidden}
@@ -100,7 +115,7 @@
       <span class="mark">✳</span><span>small imagination</span>
     </a>
     <nav class="navlinks" aria-label="Main navigation">
-      <a href="#about">About</a><a href="#focus">Our focus</a><a href="#process">How we work</a><a href="#contact">Contact</a>
+      <a href="#about">About</a><a href="#focus">Our focus</a><a href="#catalogue">Catalogue</a><a href="#process">How we work</a><a href="#contact">Contact</a>
     </nav>
     <a class="btn btn-primary mobile-menu" href="#contact">Enquire ↗</a>
     <a class="btn btn-primary" href="#contact">Get in touch ↗</a>
@@ -144,6 +159,25 @@
           <article class="card"><div class="icon">♧</div><h3>Quality-conscious sourcing</h3><p>Supplier and product checks are central to our planned operating process.</p></article>
           <article class="card"><div class="icon">♡</div><h3>Responsive support</h3><p>Customers can contact us with general business enquiries and receive a clear response.</p></article>
         </div>
+      </div>
+    </section>
+
+
+    <section class="section catalogue" id="catalogue">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">Product information</div>
+          <h2>Explore our product catalogue.</h2>
+          <p>Browse the product names, manufacturers and pack information shared with us. Use search or category filters to find a listing.</p>
+        </div>
+        <div class="catalogue-tools">
+          <input id="productSearch" type="search" placeholder="Search product or manufacturer…" aria-label="Search products">
+          <select id="categoryFilter" aria-label="Filter products by category">
+            <option value="">All categories</option>
+          </select>
+        </div>
+        <div class="product-grid" id="productGrid" aria-live="polite"></div>
+        <div class="catalogue-note"><strong>Important information:</strong> This is an informational catalogue only, not an offer to sell or supply medicines. Product composition, pack details, classification, availability and applicable sale permissions must be independently verified before any commercial transaction. No diagnosis, treatment or dosage advice is provided here.</div>
       </div>
     </section>
 
@@ -207,7 +241,65 @@
   </footer>
   <script>
     // IMPORTANT: Replace this with your official business enquiry email before publishing.
+
     const BUSINESS_EMAIL = "chanderkantgiri@gmail.com";
+    const products = [
+      ["Dolo 650 (Paracetamol 650mg)","Analgesic & Antipyretic","Micro Labs Ltd.","Strip of 15 tablets"],
+      ["Crocin Advance (Paracetamol 500mg)","Analgesic & Antipyretic","Haleon (formerly GSK)","Strip of 20 tablets"],
+      ["Digene Antacid Gel (Mint)","Antacid / Digestive","Abbott India Ltd.","200 ml bottle"],
+      ["ENO Fruit Salt (Regular)","Antacid / Gas Relief","Haleon","5 g sachet / 100 g bottle"],
+      ["Electral Powder (ORS)","Oral Rehydration Salts","FDC Ltd.","21.8 g sachet"],
+      ["Vicks VapoRub","Cold & Cough Relief","Procter & Gamble (P&G)","50 ml jar"],
+      ["Strepsils Lozenges (Honey & Lemon)","Sore Throat Relief","Reckitt Benckiser","Strip of 8 lozenges"],
+      ["Benadryl Cough Formula","Cough Syrup","Johnson & Johnson","150 ml bottle"],
+      ["Otrivin Oxy Fast Relief","Nasal Decongestant Spray","Haleon","10 ml spray bottle"],
+      ["Volini Pain Relief Gel","Topical Analgesic","Sun Pharmaceutical Industries","75 g tube"],
+      ["Moov Pain Relief Cream","Topical Analgesic","Reckitt Benckiser","50 g tube"],
+      ["Cetirizine 10mg (Okacet)","Antihistamine / Allergy","Cipla Ltd.","Strip of 10 tablets"],
+      ["Allegra 120mg (Fexofenadine)","Non-Drowsy Antihistamine","Sanofi India Ltd.","Strip of 10 tablets"],
+      ["Dettol Antiseptic Liquid","Antiseptic / Disinfectant","Reckitt Benckiser","250 ml bottle"],
+      ["Savlon Antiseptic Liquid","Antiseptic / Disinfectant","ITC Ltd.","200 ml bottle"],
+      ["Betadine 10% Ointment","Topical Antiseptic","Win-Medicare Pvt. Ltd.","20 g tube"],
+      ["Soframycin Skin Cream","Topical Antibacterial","Sanofi India Ltd.","30 g tube"],
+      ["Burnol Antiseptic Cream","Burn Care","Dr. Morepen","20 g tube"],
+      ["Hansaplast Washproof Bandages","First Aid / Wound Care","Beiersdorf AG","Box of 20 strips"],
+      ["Isabgol (Sat-Isabgol)","Laxative / Fiber Supplement","Sidhpur Sat-Isabgol Factory","100 g box"],
+      ["Refresh Tears Eye Drops","Lubricating Eye Drops","Allergan India","10 ml dropper bottle"],
+      ["Becosules Z Capsules","Multivitamin & Zinc","Pfizer Ltd.","Strip of 20 capsules"]
+    ];
+    const productGrid = document.getElementById("productGrid");
+    const categoryFilter = document.getElementById("categoryFilter");
+    const productSearch = document.getElementById("productSearch");
+    const categories = [...new Set(products.map(p => p[1]))].sort();
+    categories.forEach(category => {
+      const option = document.createElement("option");
+      option.value = category; option.textContent = category;
+      categoryFilter.appendChild(option);
+    });
+    function renderProducts(){
+      const q = productSearch.value.trim().toLowerCase();
+      const category = categoryFilter.value;
+      const filtered = products.filter(p =>
+        (!category || p[1] === category) &&
+        (!q || p.join(" ").toLowerCase().includes(q))
+      );
+      productGrid.replaceChildren();
+      if(!filtered.length){
+        const empty=document.createElement("p"); empty.className="empty-products";
+        empty.textContent="No matching products found."; productGrid.appendChild(empty); return;
+      }
+      filtered.forEach(p=>{
+        const card=document.createElement("article"); card.className="product-card";
+        const tag=document.createElement("span"); tag.className="product-tag"; tag.textContent=p[1];
+        const title=document.createElement("h3"); title.textContent=p[0];
+        const brand=document.createElement("p"); brand.textContent=p[2];
+        const meta=document.createElement("div"); meta.className="product-meta"; meta.textContent="Pack information: "+p[3];
+        card.append(tag,title,brand,meta); productGrid.appendChild(card);
+      });
+    }
+    productSearch.addEventListener("input",renderProducts);
+    categoryFilter.addEventListener("change",renderProducts);
+    renderProducts();
     document.getElementById("year").textContent = new Date().getFullYear();
     document.getElementById("enquiryForm").addEventListener("submit", function(e){
       e.preventDefault();
